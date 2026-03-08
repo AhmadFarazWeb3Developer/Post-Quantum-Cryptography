@@ -1,42 +1,88 @@
 # RSA from scratch - no libraries
 
-p = 17
-q = 19
+def start():
+    # choosing two large prime numbers 
+   p=10007
+   q=10009
+   n= p*q
 
-n = p*q
+   phi= (p-1)*(q-1)
+   e=encryption_exponent(phi)
+   d=decryption_exponent(e,phi)
 
+
+   print("e : ",e)
+   print("d : ",d)
+   
+   return n,e,d
+ 
+
+def gcd(e,phi):
+    
+    while phi!=0:
+        r=e%phi
+        e=phi
+        phi=r    
+    return e
+ 
+ 
+def encryption_exponent(phi):
 
 # Choose encryption exponent e, such that
 # 1 < e < Φ(n), and
 # gcd(e, Φ(n)) = 1, that is e should be co-prime with Φ(n).
 # GCD = 1 is only possible when the numbers are different and coprime.
 
-e = 11 
-phi= (p-1)*(q-1)
+
+#  0 and 1 is useless for RSA 
+ e=2
+ while (True): 
+     if gcd(e,phi)==1:
+         return e              
+     else:
+        e=e+1
+ 
+
+def decryption_exponent(e,phi):    
+    
+    # finding a number d such that (exd) mod phi = 1
+     d=2  
+     while (True):
+      if (e*d)%phi==1:
+          return d
+      else:
+          d=d+1
+    
+    
+def encrypt_message(e,n,M):
+     cipher=M**e%n
+     return cipher
+        
+
+def decrypt_message(d,n,C):
+    decipher=C**d%n
+    return decipher
+
+n,e,d=start()
+
+
+
+# message=input("Enter the message for encryption : ")
+M=123
+
+
+# M=int.from_bytes(message.encode(),'big')
 
 
 
 
-#  gcd(e, phi) == 1
+# M must satisfy M < n for RSA to work properly.
+#  So taking the larger prime numbers
 
+cipher=encrypt_message(e,n,M)
+print("cipher",cipher)
 
+decipher=decrypt_message(d,n,cipher)
+# deC=decipher.to_bytes((decipher.bit_length()+7)//8,'big').decode()
 
-# Calculate decryption exponent d, such that
-
-d = e**-1 % Φ_n
-
-
-public_key = (n, e)
-private_key=(n,d)
-
-
-message="This is message"
-
-
-# C = M**e mod n, where C is the Cipher text and e and n are parts of public key.
-
-cipher = message**e % n,
-
-# M = C**d mod n, where M is the message and d and n are parts of private key.
-decrypted_message = cipher**d % n 
-
+print("decipher ",decipher)
