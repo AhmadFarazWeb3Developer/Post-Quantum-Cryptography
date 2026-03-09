@@ -21,15 +21,3 @@ $Cipher= message^e \ \% \  n$
 $message= Cipher^d \  \% \ n$
 
 In real life we do not encrypt message direcly we hash it into signature by any hash function
-
-# Breaking RSA
-
-For breaking RSA we know the public key (e,n) and cipher
-
-for decrypting of cipher the attacker need d
-
-for e \* d mod phi = 1
-
-for finding the d the attacker need phi
-
-for phi the attacker need p and q
