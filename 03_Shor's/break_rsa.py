@@ -3,7 +3,6 @@ import math
 n = 15
 a = 2
 
-
 def find_period():
  x=1
  while True:
@@ -28,8 +27,6 @@ else:
      
  
 mid_point=find_midpoint(r,n)     
-
-
 
 print(mid_point)
     
