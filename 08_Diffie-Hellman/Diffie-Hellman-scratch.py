@@ -51,7 +51,12 @@ data = b"a secret message"
 key1= alice_key
 
 aesgcm1= AESGCM(key1)
+
+# If you reuse a nonce with the same key — an attacker can XOR two ciphertexts together and cancel out the keystream. Your messages are exposed.
+# Nonce being public is fine. Nonce being reused is catastrophic. Your code already handles this correctly.
 nonce= os.urandom(12)
+
+
 
 cipher=aesgcm1.encrypt(nonce,data,None)
 print(cipher.hex())

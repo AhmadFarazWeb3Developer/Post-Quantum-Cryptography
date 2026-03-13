@@ -1,17 +1,15 @@
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
-from cryptography.exceptions import InvalidSignature
+from pqcrypto.sign import ml_dsa_44
 
-private_key= Ed25519PrivateKey.generate()
-public_key=private_key.public_key()
+public_key, private_key=ml_dsa_44.generate_keypair()
 
 message= b"Ahmad Faraz - PQC Journey"
 
-signature=private_key.sign(message)
+signature= ml_dsa_44.sign(private_key,message)
 
-fake_message = b"Ahmad Faraz - PQC Journey HACKED"
+result = ml_dsa_44.verify(public_key, message, signature)
+print("Original message:", result)
 
-try:
-    public_key.verify(signature, fake_message)
-    print("Valid")
-except InvalidSignature:
-    print("FAILED — message was tampered")
+# Verify tampered
+result = ml_dsa_44.verify(public_key, b"HACKED MESSAGE", signature)
+print("Tampered message:", result)
+
