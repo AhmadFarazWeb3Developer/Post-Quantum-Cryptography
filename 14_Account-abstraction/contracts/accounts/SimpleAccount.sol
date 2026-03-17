@@ -14,25 +14,39 @@ import "../core/Helpers.sol";
 import "./callback/TokenCallbackHandler.sol";
 
 /**
-  * minimal account.
-  *  this is sample minimal account.
-  *  has execute, eth handling methods
-  *  has a single signer that can send requests through the entryPoint.
-  */
-contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initializable {
+ * minimal account.
+ *  this is sample minimal account.
+ *  has execute, eth handling methods
+ *  has a single signer that can send requests through the entryPoint.
+ */
+contract SimpleAccount is
+    BaseAccount,
+    TokenCallbackHandler,
+    UUPSUpgradeable,
+    Initializable
+{
     address public owner;
+    bytes public falconPublicKey; // FALCON owner public key
 
     IEntryPoint private immutable _entryPoint;
 
-    event SimpleAccountInitialized(IEntryPoint indexed entryPoint, address indexed owner);
+    event SimpleAccountInitialized(
+        IEntryPoint indexed entryPoint,
+        address indexed owner
+    );
 
     modifier onlyOwner() {
         _onlyOwner();
         _;
     }
 
-    error NotOwner(address msgSender, address entity, address owner );
-    error NotOwnerOrEntryPoint(address msgSender, address entity, address entryPoint, address owner);
+    error NotOwner(address msgSender, address entity, address owner);
+    error NotOwnerOrEntryPoint(
+        address msgSender,
+        address entity,
+        address entryPoint,
+        address owner
+    );
 
     /// @inheritdoc BaseAccount
     function entryPoint() public view virtual override returns (IEntryPoint) {
@@ -51,19 +65,15 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
         // Directly from EOA owner, or through the account itself (which gets redirected through execute())
         require(
             msg.sender == owner || msg.sender == address(this),
-            NotOwner(
-                msg.sender,
-                address(this),
-                owner
-            )
+            NotOwner(msg.sender, address(this), owner)
         );
     }
 
     /**
      * @dev The _entryPoint member is immutable, to reduce gas consumption.  To upgrade EntryPoint,
      * a new implementation of SimpleAccount must be deployed with the new EntryPoint address, then upgrading
-      * the implementation by calling `upgradeTo()`
-      * @param anOwner the owner (signer) of this account
+     * the implementation by calling `upgradeTo()`
+     * @param anOwner the owner (signer) of this account
      */
     function initialize(address anOwner) public virtual initializer {
         _initialize(anOwner);
@@ -75,8 +85,9 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
     }
 
     // Require the function call went through EntryPoint or owner
-    function _requireForExecute() internal view override virtual {
-        require(msg.sender == address(entryPoint()) || msg.sender == owner,
+    function _requireForExecute() internal view virtual override {
+        require(
+            msg.sender == address(entryPoint()) || msg.sender == owner,
             NotOwnerOrEntryPoint(
                 msg.sender,
                 address(this),
@@ -87,19 +98,41 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
     }
 
     /// implement template method of BaseAccount
-    function _validateSignature(PackedUserOperation calldata userOp, bytes32 userOpHash)
-    internal override virtual returns (uint256 validationData) {
-
+    function _validateSignature(
+        PackedUserOperation calldata userOp,
+        bytes32 userOpHash
+    ) internal virtual override returns (uint256 validationData) {
         // UserOpHash can be generated using eth_signTypedData_v4
         if (owner != ECDSA.recover(userOpHash, userOp.signature))
             return SIG_VALIDATION_FAILED;
         return SIG_VALIDATION_SUCCESS;
     }
 
+function _validateSignature(...) {
+    // Check 1 — correct signature length for FALCON-512
+    if (userOp.signature.length != 666)
+        return SIG_VALIDATION_FAILED;
+
+    // Check 2 — signature commits to correct message and public key
+    bytes32 commitment = keccak256(abi.encodePacked(
+        userOpHash,
+        falconPublicKey
+    ));
+
+    bytes32 sigCommitment = bytes32(userOp.signature[0:32]);
+
+    if (commitment != sigCommitment)
+        return SIG_VALIDATION_FAILED;
+
+    return SIG_VALIDATION_SUCCESS;
+}
+
+
+
     /**
      * check current account deposit in the entryPoint
      */
-    function getDeposit() public virtual view returns (uint256) {
+    function getDeposit() public view virtual returns (uint256) {
         return entryPoint().balanceOf(address(this));
     }
 
@@ -115,13 +148,17 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
      * @param withdrawAddress target to send to
      * @param amount to withdraw
      */
-    function withdrawDepositTo(address payable withdrawAddress, uint256 amount) public virtual onlyOwner {
+    function withdrawDepositTo(
+        address payable withdrawAddress,
+        uint256 amount
+    ) public virtual onlyOwner {
         entryPoint().withdrawTo(withdrawAddress, amount);
     }
 
-    function _authorizeUpgrade(address newImplementation) internal view override {
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal view override {
         (newImplementation);
         _onlyOwner();
     }
 }
-
