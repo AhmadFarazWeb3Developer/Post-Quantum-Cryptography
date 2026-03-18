@@ -125,44 +125,6 @@ SLH-DSA (SPHINCS+)   → 8000-17000 bytes
 
 ---
 
-## Why Off-Chain FALCON Verification
-
-Here is the honest technical reality.
-
-### The On-Chain Problem
-
-Full FALCON verification requires polynomial ring arithmetic over NTRU lattices in 512 dimensions. Specifically:
-
-```
-1. Decode signature into polynomials s1 and s2
-2. Check vector norm: ||s1||² + ||s2||² ≤ threshold
-3. Hash message to polynomial c using SHAKE-256
-4. Verify: s1 + s2 × h ≡ c (mod q)  where h is public key polynomial
-5. q = 12289, N = 512
-```
-
-Implementing this in Solidity means:
-
-```
-Polynomial multiplication using NTT  →  512 × 512 operations
-Each operation mod 12289             →  expensive on EVM
-Full verification                    →  estimated 5-15 million gas
-One ETH transaction at 30 gwei       →  0.15 to 0.45 ETH per verification
-```
-
-This is economically impractical for real use today.
-
-### The Right Solution — EIP Precompile (Future)
-
-The correct long-term solution is an Ethereum precompile for FALCON verification — similar to how `ecrecover` is a precompile for ECDSA at address `0x01`.
-
-```
-Today:    ecrecover(hash, v, r, s)          →  precompile, ~3000 gas
-Future:   falconVerify(hash, sig, pubkey)   →  precompile, ~3000 gas
-```
-
-Several EIPs are being discussed for this. When it arrives — FALCON verification on-chain becomes trivial and cheap.
-
 ### The Practical Solution Today — Off-Chain Verification with Commitment
 
 Until the precompile exists we use an off-chain verification approach with an on-chain commitment scheme. This is a hybrid approach. It is not fully trustless but it is practical and demonstrates the complete integration architecture.
@@ -195,7 +157,7 @@ Everything else stays identical.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    OFF-CHAIN (TypeScript)                │
+│                    OFF-CHAIN (TypeScript)               │
 │                                                         │
 │  1. Generate FALCON-512 keypair                         │
 │     public_key  (897 bytes)                             │

@@ -1,11 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-/* solhint-disable avoid-low-level-calls */
-/* solhint-disable no-inline-assembly */
-/* solhint-disable reason-string */
-
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
@@ -97,37 +92,28 @@ contract SimpleAccount is
         );
     }
 
-    /// implement template method of BaseAccount
     function _validateSignature(
-        PackedUserOperation calldata userOp,
+        PackedUserOperation calldata uerOp,
         bytes32 userOpHash
-    ) internal virtual override returns (uint256 validationData) {
-        // UserOpHash can be generated using eth_signTypedData_v4
-        if (owner != ECDSA.recover(userOpHash, userOp.signature))
+    ) {
+        // Check 1 — correct signature length for FALCON-512
+        if (userOp.signature.length != 666) return SIG_VALIDATION_FAILED;
+
+        // Check 2 - Extract commitment from signature
+        bytes32 submittedCommitment = bytes32(userOp.signature[0:32]);
+
+        // Check 3 — Recompute expected commitment using stored falconPublicKey
+        bytes32 expectedCommitment = keccak256(
+            abi.encodePacked(userOpHash, falconPublicKey)
+        );
+
+        // Compare
+        if (submittedCommitment != expectedCommitment) {
             return SIG_VALIDATION_FAILED;
+        }
+
         return SIG_VALIDATION_SUCCESS;
     }
-
-function _validateSignature(...) {
-    // Check 1 — correct signature length for FALCON-512
-    if (userOp.signature.length != 666)
-        return SIG_VALIDATION_FAILED;
-
-    // Check 2 — signature commits to correct message and public key
-    bytes32 commitment = keccak256(abi.encodePacked(
-        userOpHash,
-        falconPublicKey
-    ));
-
-    bytes32 sigCommitment = bytes32(userOp.signature[0:32]);
-
-    if (commitment != sigCommitment)
-        return SIG_VALIDATION_FAILED;
-
-    return SIG_VALIDATION_SUCCESS;
-}
-
-
 
     /**
      * check current account deposit in the entryPoint
