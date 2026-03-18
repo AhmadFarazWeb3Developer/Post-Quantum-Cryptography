@@ -93,9 +93,9 @@ contract SimpleAccount is
     }
 
     function _validateSignature(
-        PackedUserOperation calldata uerOp,
+        PackedUserOperation calldata userOp,
         bytes32 userOpHash
-    ) {
+    ) internal override returns (uint256 validationData) {
         // Check 1 — correct signature length for FALCON-512
         if (userOp.signature.length != 666) return SIG_VALIDATION_FAILED;
 
