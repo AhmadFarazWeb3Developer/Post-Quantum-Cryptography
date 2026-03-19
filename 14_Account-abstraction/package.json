@@ -10,7 +10,6 @@
     "@nomicfoundation/hardhat-ethers": "^4.0.6",
     "@nomicfoundation/hardhat-ignition": "^3.0.9",
     "@nomicfoundation/hardhat-toolbox-mocha-ethers": "^3.0.3",
-    "@openzeppelin/contracts": "^5.1.0",
     "@types/chai": "^5.2.3",
     "@types/chai-as-promised": "^8.0.2",
     "@types/mocha": "^10.0.10",
@@ -18,12 +17,14 @@
     "chai": "^6.2.2",
     "ethers": "^6.16.0",
     "forge-std": "github:foundry-rs/forge-std#v1.9.4",
-    "hardhat": "^2.28.6",
+    "hardhat": "^3.1.12",
     "mocha": "^11.7.5",
     "typescript": "~5.8.0"
   },
   "type": "module",
   "dependencies": {
-    "ethers-types": "^3.18.1"
+    "ethers-types": "^3.18.1",
+    "@openzeppelin/contracts": "^5.1.0",
+    "@uniswap/v3-periphery": "^1.4.3"
   }
 }

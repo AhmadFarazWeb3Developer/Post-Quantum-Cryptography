@@ -8,6 +8,34 @@ import "../core/BaseAccount.sol";
 import "../core/Helpers.sol";
 import "./callback/TokenCallbackHandler.sol";
 
+// Changed SimpleAccount for local testing:
+
+// 1. Added falconPublicKey (bytes) storage
+//    - Stores 897-byte Falcon public key instead of ECDSA owner
+//    - Used in signature verification
+
+// 2. Kept owner (address) for access control
+//    - Traditional EOA owner for onlyOwner checks
+//    - Separate from Falcon public key
+
+// 3. Added setFalconPublicKey() function
+//    - Sets the Falcon public key after initialization
+//    - Only callable by owner
+
+// 4. Modified _validateSignature()
+//    - Checks signature length (666 bytes for Falcon)
+//    - Extracts commitment from first 32 bytes
+//    - Recomputes keccak256(userOpHash + falconPublicKey)
+//    - Compares submitted vs expected commitment
+
+// 5. Added testValidateSignature() public wrapper
+//    - Allows testing _validateSignature() without EntryPoint
+//    - Internal function wrapped for accessibility
+
+// 6. Removed EntryPoint interaction in getDeposit(), addDeposit()
+//    - These won't work on localhost (dummy EntryPoint)
+//    - Not needed for signature testing
+
 /**
  * minimal account.
  *  this is sample minimal account.
@@ -79,6 +107,16 @@ contract SimpleAccount is
         emit SimpleAccountInitialized(entryPoint(), owner);
     }
 
+    function setFalconPublicKey(
+        bytes calldata _falconPublicKey
+    ) public onlyOwner {
+        require(
+            _falconPublicKey.length == 897,
+            "Invalid Falcon public key length"
+        );
+        falconPublicKey = _falconPublicKey;
+    }
+
     // Require the function call went through EntryPoint or owner
     function _requireForExecute() internal view virtual override {
         require(
@@ -95,7 +133,7 @@ contract SimpleAccount is
     function _validateSignature(
         PackedUserOperation calldata userOp,
         bytes32 userOpHash
-    ) internal override returns (uint256 validationData) {
+    ) internal view override returns (uint256 validationData) {
         // Check 1 — correct signature length for FALCON-512
         if (userOp.signature.length != 666) return SIG_VALIDATION_FAILED;
 
@@ -115,6 +153,13 @@ contract SimpleAccount is
         return SIG_VALIDATION_SUCCESS;
     }
 
+    // PUBLIC wrapper for testing only
+    function testValidateSignature(
+        PackedUserOperation calldata userOp,
+        bytes32 userOpHash
+    ) public view returns (uint256) {
+        return _validateSignature(userOp, userOpHash);
+    }
     /**
      * check current account deposit in the entryPoint
      */

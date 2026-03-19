@@ -5,25 +5,24 @@ const { network } = hre;
 const { ethers } = await network.connect({ network: "localhost" });
 
 const deployContracts = async () => {
+  //As we cannot deploy the EntryPoint locally so choossing dummy address for it
+  // Real EntryPoint is too large (30KB) to deploy on localhost
+  // Use placeholder for contract initialization only
+
+  const entryPoint = "0x0000000000000000000000000000000000000001";
+
   const SimpleAccount = await ethers.getContractFactory("SimpleAccount");
-  const EntryPoint = await ethers.getContractFactory("EntryPoint");
-  const SimpleAccountFactory = await ethers.getContractFactory(
-    "SimpleAccountFactory",
-  );
 
-  const entryPoint = await EntryPoint.deploy();
-  await entryPoint.waitForDeployment();
-
-  const simpleAccount = await SimpleAccount.deploy(entryPoint.target);
+  const simpleAccount = await SimpleAccount.deploy(entryPoint);
   await simpleAccount.waitForDeployment();
-  const simpleAccountFactory = await SimpleAccountFactory.deploy(
-    entryPoint.target,
-  );
-  await simpleAccountFactory.waitForDeployment();
 
-  console.log("EntryPoint deployed at:", entryPoint.target);
-  console.log("SimpleAccountFactory deployed at:", simpleAccountFactory.target);
   console.log("SimpleAccount deployed at:", simpleAccount.target);
+
+  // NOT deploying SimpleAccountFactory because:
+  // - Factory constructor calls _entryPoint.senderCreator()
+  // - Fails on dummy address (no code to call)
+  // - Factory not needed for signature validation testing
+  // - Will deploy on mainnet/testnet where real EntryPoint exists
 };
 
 deployContracts().catch((error) => {

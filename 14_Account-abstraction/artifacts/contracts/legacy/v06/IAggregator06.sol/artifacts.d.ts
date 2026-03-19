@@ -15,7 +15,7 @@ export interface IAggregator06$Type {
   readonly deployedLinkReferences: {};
   readonly immutableReferences: {};
   readonly inputSourceName: "project/contracts/legacy/v06/IAggregator06.sol";
-  readonly buildInfoId: "solc-0_8_28-7ff7631a7cdd57a86742051c063fe36f91905a53";
+  readonly buildInfoId: "solc-0_8_28-d5cd8f8cd8fff651b93b83b2cc6fb6672f9ee955";
 };
 
 import "hardhat/types/artifacts";

@@ -18,7 +18,7 @@ export declare namespace BaseAccount {
     }
 
   export interface SimpleAccountInterface extends Interface {
-    getFunction(nameOrSignature: "UPGRADE_INTERFACE_VERSION" | "addDeposit" | "entryPoint" | "execute" | "executeBatch" | "falconPublicKey" | "getDeposit" | "getNonce" | "initialize" | "onERC1155BatchReceived" | "onERC1155Received" | "onERC721Received" | "owner" | "proxiableUUID" | "supportsInterface" | "upgradeToAndCall" | "validateUserOp" | "withdrawDepositTo"): FunctionFragment;
+    getFunction(nameOrSignature: "UPGRADE_INTERFACE_VERSION" | "addDeposit" | "entryPoint" | "execute" | "executeBatch" | "falconPublicKey" | "getDeposit" | "getNonce" | "initialize" | "onERC1155BatchReceived" | "onERC1155Received" | "onERC721Received" | "owner" | "proxiableUUID" | "setFalconPublicKey" | "supportsInterface" | "testValidateSignature" | "upgradeToAndCall" | "validateUserOp" | "withdrawDepositTo"): FunctionFragment;
 
     getEvent(nameOrSignatureOrTopic: "Initialized" | "SimpleAccountInitialized" | "Upgraded"): EventFragment;
 
@@ -36,7 +36,9 @@ encodeFunctionData(functionFragment: 'onERC1155Received', values: [AddressLike, 
 encodeFunctionData(functionFragment: 'onERC721Received', values: [AddressLike, AddressLike, BigNumberish, BytesLike]): string;
 encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
 encodeFunctionData(functionFragment: 'proxiableUUID', values?: undefined): string;
+encodeFunctionData(functionFragment: 'setFalconPublicKey', values: [BytesLike]): string;
 encodeFunctionData(functionFragment: 'supportsInterface', values: [BytesLike]): string;
+encodeFunctionData(functionFragment: 'testValidateSignature', values: [PackedUserOperationStruct, BytesLike]): string;
 encodeFunctionData(functionFragment: 'upgradeToAndCall', values: [AddressLike, BytesLike]): string;
 encodeFunctionData(functionFragment: 'validateUserOp', values: [PackedUserOperationStruct, BytesLike, BigNumberish]): string;
 encodeFunctionData(functionFragment: 'withdrawDepositTo', values: [AddressLike, BigNumberish]): string;
@@ -55,7 +57,9 @@ decodeFunctionResult(functionFragment: 'onERC1155Received', data: BytesLike): Re
 decodeFunctionResult(functionFragment: 'onERC721Received', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'proxiableUUID', data: BytesLike): Result;
+decodeFunctionResult(functionFragment: 'setFalconPublicKey', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'supportsInterface', data: BytesLike): Result;
+decodeFunctionResult(functionFragment: 'testValidateSignature', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'upgradeToAndCall', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'validateUserOp', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'withdrawDepositTo', data: BytesLike): Result;
@@ -244,9 +248,25 @@ decodeFunctionResult(functionFragment: 'withdrawDepositTo', data: BytesLike): Re
     
 
     
+    setFalconPublicKey: TypedContractMethod<
+      [_falconPublicKey: BytesLike, ],
+      [void],
+      'nonpayable'
+    >
+    
+
+    
     supportsInterface: TypedContractMethod<
       [interfaceId: BytesLike, ],
       [boolean],
+      'view'
+    >
+    
+
+    
+    testValidateSignature: TypedContractMethod<
+      [userOp: PackedUserOperationStruct, userOpHash: BytesLike, ],
+      [bigint],
       'view'
     >
     
@@ -348,9 +368,19 @@ getFunction(nameOrSignature: 'proxiableUUID'): TypedContractMethod<
       [string],
       'view'
     >;
+getFunction(nameOrSignature: 'setFalconPublicKey'): TypedContractMethod<
+      [_falconPublicKey: BytesLike, ],
+      [void],
+      'nonpayable'
+    >;
 getFunction(nameOrSignature: 'supportsInterface'): TypedContractMethod<
       [interfaceId: BytesLike, ],
       [boolean],
+      'view'
+    >;
+getFunction(nameOrSignature: 'testValidateSignature'): TypedContractMethod<
+      [userOp: PackedUserOperationStruct, userOpHash: BytesLike, ],
+      [bigint],
       'view'
     >;
 getFunction(nameOrSignature: 'upgradeToAndCall'): TypedContractMethod<
