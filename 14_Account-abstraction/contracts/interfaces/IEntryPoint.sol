@@ -143,7 +143,11 @@ interface IEntryPoint is IStakeManager, INonceManager {
     error FailedOp(uint256 opIndex, string reason);
 
     error InvalidBeneficiary(address beneficiary);
-    error FailedSendToBeneficiary(address beneficiary, uint256 amount, bytes revertData);
+    error FailedSendToBeneficiary(
+        address beneficiary,
+        uint256 amount,
+        bytes revertData
+    );
     error InternalFunction();
     error InvalidPaymasterData(uint256 paymasterAndDataLength);
     error InvalidPaymaster(address paymaster);

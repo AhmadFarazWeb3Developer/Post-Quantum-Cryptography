@@ -15,7 +15,7 @@ export interface IEntryPoint$Type {
   readonly deployedLinkReferences: {};
   readonly immutableReferences: {};
   readonly inputSourceName: "project/contracts/interfaces/IEntryPoint.sol";
-  readonly buildInfoId: "solc-0_8_28-d5cd8f8cd8fff651b93b83b2cc6fb6672f9ee955";
+  readonly buildInfoId: "solc-0_8_28-eef5382d3098c5533804fbe1ffed02d0a8599b6c";
 };
 
 import "hardhat/types/artifacts";

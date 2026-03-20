@@ -1,4 +1,5 @@
 import hre from "hardhat";
+import fs from "fs";
 
 const { network } = hre;
 
@@ -17,6 +18,23 @@ const deployContracts = async () => {
   await simpleAccount.waitForDeployment();
 
   console.log("SimpleAccount deployed at:", simpleAccount.target);
+
+  const folder = "deployment";
+  if (!fs.existsSync(folder)) {
+    fs.mkdirSync(folder);
+  }
+
+  // Save deployed address
+  fs.writeFileSync(
+    `${folder}/deployedAddress.json`,
+    JSON.stringify(
+      {
+        simpleAccount: simpleAccount.target,
+      },
+      null,
+      2,
+    ),
+  );
 
   // NOT deploying SimpleAccountFactory because:
   // - Factory constructor calls _entryPoint.senderCreator()
