@@ -135,7 +135,8 @@ contract SimpleAccount is
         bytes32 userOpHash
     ) internal view override returns (uint256 validationData) {
         // Check 1 — correct signature length for FALCON-512
-        if (userOp.signature.length != 666) return SIG_VALIDATION_FAILED;
+        //  commitment (32 bytes) + falcon_signature (666 bytes)
+        if (userOp.signature.length != 698) return SIG_VALIDATION_FAILED;
 
         // Check 2 - Extract commitment from signature
         bytes32 submittedCommitment = bytes32(userOp.signature[0:32]);
