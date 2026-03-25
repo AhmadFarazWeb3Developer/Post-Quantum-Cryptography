@@ -10,11 +10,14 @@ const deployContracts = async () => {
   // Real EntryPoint is too large (30KB) to deploy on localhost
   // Use placeholder for contract initialization only
 
+  const [owner] = await ethers.getSigners();
+
   const entryPoint = "0x0000000000000000000000000000000000000001";
 
   const SimpleAccount = await ethers.getContractFactory("SimpleAccount");
 
   const simpleAccount = await SimpleAccount.deploy(entryPoint);
+
   await simpleAccount.waitForDeployment();
 
   console.log("SimpleAccount deployed at:", simpleAccount.target);
@@ -30,6 +33,7 @@ const deployContracts = async () => {
     JSON.stringify(
       {
         simpleAccount: simpleAccount.target,
+        eoa_public_key: owner.address,
       },
       null,
       2,
