@@ -15,7 +15,7 @@ export interface Simple7702Account$Type {
   readonly deployedLinkReferences: {};
   readonly immutableReferences: {"9209":[{"length":32,"start":1617}]};
   readonly inputSourceName: "project/contracts/accounts/Simple7702Account.sol";
-  readonly buildInfoId: "solc-0_8_28-eef5382d3098c5533804fbe1ffed02d0a8599b6c";
+  readonly buildInfoId: "solc-0_8_28-3f4ee4630f9d01cfee2851f8451d28cd4ac21008";
 };
 
 import "hardhat/types/artifacts";

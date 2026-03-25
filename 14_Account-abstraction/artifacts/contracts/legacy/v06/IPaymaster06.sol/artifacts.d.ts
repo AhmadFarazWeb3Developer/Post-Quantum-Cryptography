@@ -15,7 +15,7 @@ export interface IPaymaster06$Type {
   readonly deployedLinkReferences: {};
   readonly immutableReferences: {};
   readonly inputSourceName: "project/contracts/legacy/v06/IPaymaster06.sol";
-  readonly buildInfoId: "solc-0_8_28-d5cd8f8cd8fff651b93b83b2cc6fb6672f9ee955";
+  readonly buildInfoId: "solc-0_8_28-3f4ee4630f9d01cfee2851f8451d28cd4ac21008";
 };
 
 import "hardhat/types/artifacts";

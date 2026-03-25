@@ -13,7 +13,6 @@ import "../interfaces/IEntryPointSimulations.sol";
  * This contract should never be deployed on-chain and is only used as a parameter for the "eth_call" request.
  */
 contract EntryPointSimulations is EntryPoint, IEntryPointSimulations {
-
     error NotImplemented();
     error PaymasterNotDeployed(address paymaster);
 
@@ -23,13 +22,27 @@ contract EntryPointSimulations is EntryPoint, IEntryPointSimulations {
 
     function initSenderCreator() internal virtual {
         // This is the address of the first contract created with CREATE by this address.
-        address createdObj = address(uint160(uint256(keccak256(abi.encodePacked(hex"d694", address(this), hex"01")))));
+        address createdObj = address(
+            uint160(
+                uint256(
+                    keccak256(
+                        abi.encodePacked(hex"d694", address(this), hex"01")
+                    )
+                )
+            )
+        );
         _senderCreator = SenderCreator(createdObj);
 
         _initDomainSeparator();
     }
 
-    function senderCreator() public view virtual override(EntryPoint, IEntryPoint) returns (ISenderCreator) {
+    function senderCreator()
+        public
+        view
+        virtual
+        override(EntryPoint, IEntryPoint)
+        returns (ISenderCreator)
+    {
         // return the same senderCreator as real EntryPoint.
         // this call is slightly (100) more expensive than EntryPoint's access to immutable member
         return _senderCreator;
@@ -38,11 +51,7 @@ contract EntryPointSimulations is EntryPoint, IEntryPointSimulations {
     /// @inheritdoc IEntryPointSimulations
     function simulateValidation(
         PackedUserOperation calldata userOp
-    )
-    external
-    returns (
-        ValidationResult memory
-    ){
+    ) external returns (ValidationResult memory) {
         UserOpInfo memory outOpInfo;
 
         _simulationOnlyValidations(userOp);
@@ -58,7 +67,7 @@ contract EntryPointSimulations is EntryPoint, IEntryPointSimulations {
         {
             bytes calldata initCode = userOp.initCode;
             address factory = initCode.length >= 20
-                ? address(bytes20(initCode[0 : 20]))
+                ? address(bytes20(initCode[0:20]))
                 : address(0);
             factoryInfo = _getStakeInfo(factory);
         }
@@ -73,19 +82,23 @@ contract EntryPointSimulations is EntryPoint, IEntryPointSimulations {
         );
 
         AggregatorStakeInfo memory aggregatorInfo; // = NOT_AGGREGATED;
-        if (uint160(aggregator) != SIG_VALIDATION_SUCCESS && uint160(aggregator) != SIG_VALIDATION_FAILED) {
+        if (
+            uint160(aggregator) != SIG_VALIDATION_SUCCESS &&
+            uint160(aggregator) != SIG_VALIDATION_FAILED
+        ) {
             aggregatorInfo = AggregatorStakeInfo(
                 aggregator,
                 _getStakeInfo(aggregator)
             );
         }
-        return ValidationResult(
-            returnInfo,
-            senderInfo,
-            factoryInfo,
-            paymasterInfo,
-            aggregatorInfo
-        );
+        return
+            ValidationResult(
+                returnInfo,
+                senderInfo,
+                factoryInfo,
+                paymasterInfo,
+                aggregatorInfo
+            );
     }
 
     /// @inheritdoc IEntryPointSimulations
@@ -93,11 +106,7 @@ contract EntryPointSimulations is EntryPoint, IEntryPointSimulations {
         PackedUserOperation calldata op,
         address target,
         bytes calldata targetCallData
-    )
-    external nonReentrant
-    returns (
-        ExecutionResult memory
-    ){
+    ) external nonReentrant returns (ExecutionResult memory) {
         UserOpInfo memory opInfo;
         _simulationOnlyValidations(op);
         (
@@ -111,30 +120,29 @@ contract EntryPointSimulations is EntryPoint, IEntryPointSimulations {
         if (target != address(0)) {
             (targetSuccess, targetResult) = target.call(targetCallData);
         }
-        return ExecutionResult(
-            opInfo.preOpGas,
-            paid,
-            validationData,
-            paymasterValidationData,
-            targetSuccess,
-            targetResult
-        );
+        return
+            ExecutionResult(
+                opInfo.preOpGas,
+                paid,
+                validationData,
+                paymasterValidationData,
+                targetSuccess,
+                targetResult
+            );
     }
 
     function _simulationOnlyValidations(
         PackedUserOperation calldata userOp
-    )
-    internal
-    {
+    ) internal {
         // Initialize senderCreator(). we can't rely on constructor
         initSenderCreator();
 
         try
-        this.validateSenderAndPaymaster(
-            userOp.initCode,
-            userOp.sender,
-            userOp.paymasterAndData
-        )
+            this.validateSenderAndPaymaster(
+                userOp.initCode,
+                userOp.sender,
+                userOp.paymasterAndData
+            )
         // solhint-disable-next-line no-empty-blocks
         {} catch Error(string memory revertReason) {
             if (bytes(revertReason).length != 0) {
@@ -160,7 +168,7 @@ contract EntryPointSimulations is EntryPoint, IEntryPointSimulations {
             revert FailedOp(0, "AA20 account not deployed");
         }
         if (paymasterAndData.length >= 20) {
-            address paymaster = address(bytes20(paymasterAndData[0 : 20]));
+            address paymaster = address(bytes20(paymasterAndData[0:20]));
             if (paymaster.code.length == 0) {
                 // It would revert anyway. but give a meaningful message.
                 revert PaymasterNotDeployed(paymaster);
@@ -174,10 +182,12 @@ contract EntryPointSimulations is EntryPoint, IEntryPointSimulations {
     // Make sure depositTo cost is more than normal EntryPoint's cost,
     // to mitigate DoS vector on the bundler
     // empiric test showed that without this wrapper, simulation depositTo costs less..
-    function depositTo(address account) public override(IStakeManager, StakeManager) payable {
-        unchecked{
-        // silly code, to waste some gas to make sure depositTo is always little more
-        // expensive than on-chain call
+    function depositTo(
+        address account
+    ) public payable override(IStakeManager, StakeManager) {
+        unchecked {
+            // silly code, to waste some gas to make sure depositTo is always little more
+            // expensive than on-chain call
             uint256 x = 1;
             while (x < 5) {
                 x++;
@@ -188,13 +198,24 @@ contract EntryPointSimulations is EntryPoint, IEntryPointSimulations {
 
     // Copied from EIP712.sol
     bytes32 private constant TYPE_HASH =
-    // solhint-disable-next-line gas-small-strings
-    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
+        // solhint-disable-next-line gas-small-strings
+        keccak256(
+            "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+        );
 
     function __buildDomainSeparator() private view returns (bytes32) {
         bytes32 _hashedName = keccak256(bytes(DOMAIN_NAME));
         bytes32 _hashedVersion = keccak256(bytes(DOMAIN_VERSION));
-        return keccak256(abi.encode(TYPE_HASH, _hashedName, _hashedVersion, block.chainid, address(this)));
+        return
+            keccak256(
+                abi.encode(
+                    TYPE_HASH,
+                    _hashedName,
+                    _hashedVersion,
+                    block.chainid,
+                    address(this)
+                )
+            );
     }
 
     // Can't rely on "immutable" (constructor-initialized) variables" in simulation
@@ -202,11 +223,13 @@ contract EntryPointSimulations is EntryPoint, IEntryPointSimulations {
         __domainSeparatorV4 = __buildDomainSeparator();
     }
 
-    function getDomainSeparatorV4() public override view returns (bytes32) {
+    function getDomainSeparatorV4() public view override returns (bytes32) {
         return __domainSeparatorV4;
     }
 
-    function supportsInterface(bytes4) public view virtual override returns (bool) {
+    function supportsInterface(
+        bytes4
+    ) public view virtual override returns (bool) {
         return false;
     }
 
@@ -216,5 +239,4 @@ contract EntryPointSimulations is EntryPoint, IEntryPointSimulations {
     ) external pure override(EntryPoint, IEntryPoint) {
         revert NotImplemented();
     }
-
 }

@@ -9,28 +9,31 @@ import "../core/Helpers.sol";
 import "./callback/TokenCallbackHandler.sol";
 
 // Changed SimpleAccount for local testing:
+// 1. Updated constructor to handle initial state
+//    - Added address _initialOwner as a second parameter
+//    - Explicitly sets the owner state variable at deployment
+//    - Still calls _disableInitializers() to protect the logic contract
 
-// 1. Added falconPublicKey (bytes) storage
-//    - Stores 897-byte Falcon public key instead of ECDSA owner
-//    - Used in signature verification
+// 2. Implemented setFalconPublicKey() with validation
+//    - Restricted to the owner using the onlyOwner modifier
+//    - Added a strict length check: require(_falconPublicKey.length == 897)
+//    - Updates the falconPublicKey storage slot for future verification
 
-// 2. Kept owner (address) for access control
-//    - Traditional EOA owner for onlyOwner checks
-//    - Separate from Falcon public key
+// 3. Redefined _validateSignature() for commitment checking
+//    - Added a strict length check: require(userOp.signature.length == 698)
+//    - Used array slicing: bytes32(userOp.signature[0:32]) to isolate the commitment
+//    - Applied abi.encodePacked() to hash the userOpHash and falconPublicKey together
+//    - Returns SIG_VALIDATION_SUCCESS (0) or SIG_VALIDATION_FAILED (1) based on equality
 
-// 3. Added setFalconPublicKey() function
-//    - Sets the Falcon public key after initialization
-//    - Only callable by owner
+// 4. Exposed _validateSignature() via testValidateSignature()
+//    - Defined as a public view function for external script access
+//    - Bridges the internal validation logic to your ts-node testing environment
+//    - Bypasses the need for an EntryPoint contract call during local dev
 
-// 4. Modified _validateSignature()
-//    - Checks signature length (666 bytes for Falcon)
-//    - Extracts commitment from first 32 bytes
-//    - Recomputes keccak256(userOpHash + falconPublicKey)
-//    - Compares submitted vs expected commitment
-
-// 5. Added testValidateSignature() public wrapper
-//    - Allows testing _validateSignature() without EntryPoint
-//    - Internal function wrapped for accessibility
+// 5. Modified access control logic (_onlyOwner)
+//    - Retained standard address-based ownership for administrative tasks
+//    - Decoupled administrative "owner" from cryptographic "Falcon signer"
+//    - Ensures only the EOA owner can update the Post-Quantum public key
 
 // 6. Removed EntryPoint interaction in getDeposit(), addDeposit()
 //    - These won't work on localhost (dummy EntryPoint)
@@ -79,8 +82,9 @@ contract SimpleAccount is
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 
-    constructor(IEntryPoint anEntryPoint) {
+    constructor(IEntryPoint anEntryPoint, address _initialOwner) {
         _entryPoint = anEntryPoint;
+        owner = _initialOwner;
         _disableInitializers();
     }
 
@@ -146,7 +150,6 @@ contract SimpleAccount is
             abi.encodePacked(userOpHash, falconPublicKey)
         );
 
-        // Compare
         if (submittedCommitment != expectedCommitment) {
             return SIG_VALIDATION_FAILED;
         }

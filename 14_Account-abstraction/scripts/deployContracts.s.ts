@@ -6,7 +6,7 @@ const { network } = hre;
 const { ethers } = await network.connect({ network: "localhost" });
 
 const deployContracts = async () => {
-  //As we cannot deploy the EntryPoint locally so choossing dummy address for it
+  // As we cannot deploy the EntryPoint locally so choossing dummy address for it
   // Real EntryPoint is too large (30KB) to deploy on localhost
   // Use placeholder for contract initialization only
 
@@ -16,7 +16,7 @@ const deployContracts = async () => {
 
   const SimpleAccount = await ethers.getContractFactory("SimpleAccount");
 
-  const simpleAccount = await SimpleAccount.deploy(entryPoint);
+  const simpleAccount = await SimpleAccount.deploy(entryPoint, owner.address);
 
   await simpleAccount.waitForDeployment();
 

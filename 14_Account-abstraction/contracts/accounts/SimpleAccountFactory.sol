@@ -24,7 +24,7 @@ contract SimpleAccountFactory {
     );
 
     constructor(IEntryPoint _entryPoint) {
-        accountImplementation = new SimpleAccount(_entryPoint);
+        accountImplementation = new SimpleAccount(_entryPoint, address(0));
         senderCreator = _entryPoint.senderCreator();
     }
 

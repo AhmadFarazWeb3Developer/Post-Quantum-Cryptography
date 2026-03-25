@@ -7,7 +7,7 @@ from pqcrypto.sign import falcon_512 as falcon
 with open('14_Account-abstraction/encryption/keys.json','r')as file:
     keys=json.load(file)
 
-# Read deployed address
+# Reading deployed address
 with open("14_Account-abstraction/deployment/deployedAddress.json", "r") as file:
     deployment = json.load(file)
 
@@ -58,5 +58,5 @@ final_signature = commitment + signature
 
 userOperation["signature"] = "0x" + final_signature.hex()
 
-with open('14_Account-abstraction/encryption/userOperation.json','w')as file:
-   file.write (json.dumps(userOperation))
+with open('14_Account-abstraction/encryption/operations.json','w')as file:
+   file.write (json.dumps({'userOp':userOperation,'userOpHash':'0x' + userOpHash.hex()}))
